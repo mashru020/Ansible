@@ -8,3 +8,17 @@ ansible all --list-host
 #All information about target server
 ansible all -m gather_facts
 ansible all -m gather_facts --limit rdcd@10.11.200.30
+
+
+#sudo command 
+ansible all -m apt -a update_cache=true --become --ask-become-pass
+
+#install app
+ansible all -m apt -a name=vim-nox --become --ask-become-pass
+
+#multiple agrument 
+ansible all -m apt -a "name=snapd state=latest" --become --ask-become-pass
+
+#update all
+ansible all -m apt -a "upgrade=dist" --become --ask-become-pass
+
