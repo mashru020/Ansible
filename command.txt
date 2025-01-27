@@ -1,0 +1,10 @@
+#test all are working
+ansible all --key-file ~/.ssh/ansible -i ../Ansible/inventory -m ping
+ansible all -m ping
+
+#list to target server
+ansible all --list-host
+
+#All information about target server
+ansible all -m gather_facts
+ansible all -m gather_facts --limit rdcd@10.11.200.30
