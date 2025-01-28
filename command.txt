@@ -22,3 +22,8 @@ ansible all -m apt -a "name=snapd state=latest" --become --ask-become-pass
 #update all
 ansible all -m apt -a "upgrade=dist" --become --ask-become-pass
 
+#run a playbook
+ansible-playbook -- ask-become-pass install_apache.yml
+
+#check ansible distribution
+ansible all -m gather_facts --limit era@10.11.204.35 | grep ansible_distribution
