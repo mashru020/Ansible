@@ -1,0 +1,19 @@
+- name: Create AWS VPC Subnet
+  hosts: localhost
+  gather_facts: no
+  connection: local
+  tasks:
+    - name: Create a subnet in an existing VPC
+      amazon.aws.ec2_vpc_subnet:
+        vpc_id: "vpc-0846b6f5203c586ac"  # Replace with your VPC ID
+        cidr: "10.0.1.0/24"  # Define the subnet range
+        az: "us-east-1a"  # Change the AZ based on your region
+        region: "us-east-1"  # Change to your AWS region
+        state: present
+        tags:
+          Name: "Ansible_subnet"
+      register: subnet
+
+    - name: Show subnet details
+      debug:
+        var: subnet

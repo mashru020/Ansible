@@ -9,12 +9,23 @@
           name: ansible_vpc
           cidr_block: 10.0.0.0/16
           region: ap-southeast-1  # Change to your preferred AWS region
-          state: absent
+          state: present
         register: vpc
   
-      - name: Output VPC details
-        debug:
-          msg:
-            - "VPC ID: {{ vpc.vpc.id }}"
-            - "CIDR Block: {{ vpc.vpc.cidr_block }}"
-  
+      # - name: Output VPC details
+      #   debug:
+      #     msg:
+      #       - "VPC ID: {{ vpc.vpc.id }}"
+      #       - "CIDR Block: {{ vpc.vpc.cidr_block }}"
+      - name: Allow inbound HTTP traffic on port 80
+        amazon.aws.ec2_security_group:
+          name: "my-security-group"  # Replace with your security group name
+          description: "My security group"
+          region: "us-east-1"  # Change as needed
+          rules:
+            - proto: tcp
+              ports:
+                - 80
+              cidr_ip: 0.0.0.0/0
+              rule_desc: "Allow HTTP traffic"
+          state: present

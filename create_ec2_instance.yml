@@ -2,25 +2,27 @@
 - name: Create AWS Infrastructure and Instances
   hosts: localhost
   gather_facts: no
+  connection: local
   tasks:
-
     - name: Create a VPC
-      amazon.aws.ec2_vpc:
+      amazon.aws.ec2_vpc_net:
         name: "ansible-vpc"
         cidr_block: "10.0.0.0/16"
-        enable_dns_support: true
-        enable_dns_hostnames: true
+        dns_support: true
+        dns_hostnames: true
         region: "ap-southeast-1"  # Corrected region
         state: present
       register: vpc
-
+      
     - name: Create a Subnet
       amazon.aws.ec2_vpc_subnet:
         vpc_id: "{{ vpc.vpc.id }}"
         cidr: "10.0.1.0/24"
-        availability_zone: "ap-southeast-1a"
-        state: present
+        az: "ap-southeast-1a"
         region: "ap-southeast-1"
+        state: present
+        tags:
+          Name: "Ansible_subnet"
       register: subnet
   
     - name: Create an Internet Gateway
@@ -42,8 +44,9 @@
         route_table_id: "{{ route_table_info.route_tables[0].id }}"
         region: "ap-southeast-1"
         routes:
-          - dest: "0.0.0.0/0"
-            gateway_id: "{{ igw.internet_gateway.id }}"
+          routes:
+          - destination_cidr_block: "0.0.0.0/0"
+            gateway_id: "{{ igw.internet_gateway_id }}"
         state: present
 
     - name: Create a Security Group
@@ -56,28 +59,34 @@
       register: sg
 
     - name: Add Ingress Rules to Security Group
-      amazon.aws.ec2_security_group_rule:
+      amazon.aws.ec2_security_group:
         security_group_id: "{{ sg.group_id }}"
         region: "ap-southeast-1"
-        inbound:
+        rules:
           - proto: tcp
-            from_port: 22
-            to_port: 22
-            cidr_ip: "0.0.0.0/0"
-          - proto: tcp
-            from_port: 80
-            to_port: 80
-            cidr_ip: "0.0.0.0/0"
+            ports:
+              - 80
+              - 22
+            cidr_ip: 0.0.0.0/0
+            rule_desc: "Allow HTTP traffic"
+        state: present
 
-    - name: Launch 3 Ubuntu Instances
+    - name: Fetch Ubuntu 20.04 AMI ID
+      amazon.aws.ec2_ami_info:
+        region: "ap-southeast-1"
+        filters:
+          name: "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+      register: ami_info
+
+    - name: Launch 3 EC2 Instances
       amazon.aws.ec2_instance:
         name: "{{ item }}"
         key_name: "ansible-key"
         instance_type: "t2.micro"
-        image_id: "{{ lookup('amazon.aws.ec2_ami_facts', aws_region='ap-southeast-1', filters={'name': 'ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*'}).images[0].image_id }}"
+        image_id: "{{ ami_info.images[0].image_id }}"
         region: "ap-southeast-1"
-        vpc_subnet_id: "{{ subnet.subnet.id }}"
-        security_group: "{{ sg.group_id }}"
+        vpc_subnet_id: "{{ subnet.subnet.id }}"   # Ensure this variable is defined
+        security_group: "{{ sg.group_id }}"       # Ensure this variable is defined
       loop:
         - ansible-instance-1
         - ansible-instance-2
