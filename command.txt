@@ -27,3 +27,8 @@ ansible-playbook -- ask-become-pass install_apache.yml
 
 #check ansible distribution
 ansible all -m gather_facts --limit era@10.11.204.35 | grep ansible_distribution
+
+
+# list tags in playbook
+ansible-playbook --list-tags site.yml
+ansible-playbook --tags ubuntu site.yml

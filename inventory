@@ -4,3 +4,12 @@ era@10.11.204.35
 
 [localhost]
 127.0.0.1
+
+
+[web_servers]
+ubuntu@152.69.212.168
+ubuntu@138.2.83.154
+
+[db_servers]
+
+[file_servers]
