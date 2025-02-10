@@ -77,6 +77,31 @@
       state: latest
     when: ansible_distribution == "CentOS"
 
+  - name: start https (CentOS)
+    tags: apache, httpd, apache2
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_destribution == "CentOS"
+
+  - name: change e-mail address for admin
+    tags: apache,centos,httpd
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: ServerAdmin somebody@somewhere.net
+    when: ansible_distribution == "CentOS"
+    register: Myhttpd
+
+  - name: restart httpd (CentOS)
+    tags: apache,centos,httpd
+    service:
+      name: httpd
+      state: restarted
+    when: Myhttpd.changed
+
+
   - name: copy default html file for site
     tags: apache,apache2,httpd,
     copy:
