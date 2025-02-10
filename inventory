@@ -13,3 +13,6 @@ ubuntu@138.2.83.154
 [db_servers]
 
 [file_servers]
+
+[workstations]
+ubuntu@138.2.64.40
