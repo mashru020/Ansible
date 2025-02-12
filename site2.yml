@@ -4,23 +4,42 @@
   become: true
   pre_tasks:
 
-  - name: update repo cache (CentOS)
+  - name: install updates (CentOS)
     tags: always
     dnf: 
+      update_only: yes
       update_cache: yes
-    changed_when: false
     when: ansible_distribution == "CentOS"
 
-  - name: update repo cache (Ubuntu)
+  - name: install updates (Ubuntu)
     tags: always
     apt:
+      upgrade: dist
       update_cache: yes
-    changed_when: false
     when: ansible_distribution == "Ubuntu"
+
+  - name: install net-tools (ubuntu)
+    tags: always
+    package:
+      name: net-tools
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+  - name: install ufw (ubuntu)
+    tags: ubunt,ufw
+    apt:
+      name:
+        - ufw
+      state: latest
 
 - hosts: all
   become: true
   tasks:
+  - name: create simone user
+    tags: always
+    user:
+      name: simone
+      groups: root
 
   - name: add ssh key for simone
     tags: always
@@ -28,6 +47,15 @@
       user: simone
       key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINFMxc+zkFKcGvLHsu80Xwi5mzsrRW2lMLwxteAgTlkz ansible"
   
+  - name: add sudoers file for simone
+    tags: always
+    copy:
+      src: sudoer_simone
+      dest: /etc/sudoers.d/simone
+      owner: root
+      group: root    
+
+
 - hosts: workstations
   become: true
   tasks:
